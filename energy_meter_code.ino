@@ -1,12 +1,16 @@
-Embedded Code
-
 #include <Energy.h>
+
 #include <LiquidCrystal.h>
 #include <SoftwareSerial.h>
+
+
+//#include "Energy.h"
+
+             
 EnergyMonitor emon1;             
 int a,b=0,i=0,num=0,n;
 long int ti;
-int threshold[12] = {222, 162, 88, 396, 356, 313, 512, 488, 455, 575, 7, 275};
+int threshold[12] = {230, 170, 100, 400, 360, 320, 520, 496, 460, 585, 19, 270};
 char keys[12] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'A', 'B'};
 float energy = 0, pd, pm, pvd=0, pvm=0, ac,nac,Penergy = 0,tenergy,count;
 unsigned long start,t;
@@ -20,26 +24,27 @@ void setup()
   lcd.print("Real Time Power");
   lcd.setCursor(3,1);
   lcd.print("Monitoring");
+  emon1.voltage(1, 240.0, 0.7);  // Voltage: input pin, calibration, phase_shift
+  emon1.current(2, 111.1);       // Current: input pin, calibration.
   start = millis();
   t = millis();
   }
-
-
 
 void loop()
 {
   keypadcall();
   
-  emon1.calcVI(20,2000);         
-  emon1.serialprint();           
-  float realPower       = emon1.realPower;        
-  float apparentPower   = emon1.apparentPower;    
-  float powerFActor     = emon1.powerFactor;      
-  float supplyVoltage   = emon1.Vrms;             
-  float Irms            = emon1.Irms;             
+  emon1.calcVI(20,2000);         // Calculate all. No.of half wavelengths (crossings), time-out
+  emon1.serialprint();           // Print out all variables (realpower, apparent power, Vrms, Irms, power factor)
+  
+  float realPower       = emon1.realPower;        //extract Real Power into variable
+  float apparentPower   = emon1.apparentPower;    //extract Apparent Power into variable
+  float powerFActor     = emon1.powerFactor;      //extract Power Factor into Variable
+  float supplyVoltage   = emon1.Vrms;             //extract Vrms into Variable
+  float Irms            = emon1.Irms;             //extract Irms into Variable
   float s1 = ((millis() - t)/(60000.0));
-  if(realPower<10.0)realPower = abs(realPower - 4.0);
-  tenergy = 1.2* (realPower/1000.0) * s1;
+  if(realPower<60.0)realPower = 0;
+  tenergy = 1.2 * (realPower/1000.0) * s1;
   if((millis() - t) >= 10000)
   {
   Penergy = Penergy + tenergy;
@@ -84,19 +89,26 @@ void loop()
    delay(1000);  
     mySerial.println("Your per minute consumption is :");
      delay(100); 
+     //Serial.println("Your per minute consumption is :");
     mySerial.println(pd);
-      delay(100); 
+    //Serial.println(pd);
+     delay(100); 
     mySerial.println("Your consumption is ");
      delay(100); 
+     //Serial.println("To maintain within the limits, per day use should be reduced by");
     float b = ((pd/nac)*100.0)-100.0;
     mySerial.println(b);
-       delay(100); 
+    
+   // Serial.println(pd-nac);
+     delay(100); 
       mySerial.println("% more than avg level");
      delay(100); 
     nac = ((num - pd)/count);
     mySerial.println("Your new avg consumption level is");
     delay(100);
-    mySerial.println(nac);
+   // Serial.println("Your new avg consumption level is");
+     mySerial.println(nac);
+     //Serial.println(nac);
      delay(100);
     mySerial.println((char)26);// ASCII code of CTRL+Z
      delay(1000); 
@@ -108,17 +120,19 @@ void loop()
      delay(1000); 
   mySerial.println("AT+CMGS=\"+919500531432\"\r"); 
    delay(1000); 
-    mySerial.println("Your per day consumption is :");
+    mySerial.println("Your per minute consumption is :");
      delay(100); 
+     //Serial.println("Your per day consumption is :");
     mySerial.println(pd);
-   
+   // Serial.println(pd);
      delay(100); 
      nac = ((num - pd)/count);
      mySerial.println("Your new avg consumption level is");
-        delay(100);
+    // Serial.println("Your new avg consumption level is");
+    delay(100);
      mySerial.println(nac);
      delay(100);
-     
+     //Serial.println(nac);
     mySerial.println((char)26);
      delay(1000); 
     }
@@ -133,10 +147,9 @@ void loop()
 void keypadcall()
 {
     a = analogRead(0);
+    
    
- 
-
- if ( abs(a - threshold[10])<15)
+  if ( abs(a - threshold[10])<15)
     {
      num = 0;
     lcd.clear();
@@ -182,5 +195,13 @@ void keypadcall()
      delay(100); 
      mySerial.println((char)26);
      delay(1000); 
- }
+             
+             
+
+
+
     }
+    }
+
+
+
