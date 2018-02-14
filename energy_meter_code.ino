@@ -191,13 +191,5 @@ void keypadcall()
      delay(100); 
      mySerial.println((char)26);
      delay(1000); 
-             
-             
-
-
-
-    }
-    }
-
-
-
+   }
+}
