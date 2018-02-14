@@ -3,10 +3,6 @@
 #include <LiquidCrystal.h>
 #include <SoftwareSerial.h>
 
-
-//#include "Energy.h"
-
-             
 EnergyMonitor emon1;             
 int a,b=0,i=0,num=0,n;
 long int ti;
